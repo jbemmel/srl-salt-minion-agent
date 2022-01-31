@@ -71,7 +71,7 @@ redeploy-lab: destroy-lab deploy-lab create-app-symlink
 
 deploy-all: redeploy-all
 
-redeploy-all: redeploy-lab remote-venv create-app-symlink restart-app
+redeploy-all: redeploy-lab remote-venv # create-app-symlink restart-app
 
 # lint an app and restart app_mgr without redeploying the lab
 lint-restart: lint restart-app
