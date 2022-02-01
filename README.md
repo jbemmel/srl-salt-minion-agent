@@ -1,7 +1,7 @@
 # srl-salt-minion-agent
 A sample Salt minion created using the NDK Dev Environment
 
-## How to build an agent based on the NDK Dev Environment in ❼ easy steps
+## How to build an agent based on the NDK Dev Environment in ❽ easy steps
 
 See also [this demo agent](https://github.com/jbemmel/srl-salt-minion-agent/tree/greeter-app-go)
 
@@ -15,3 +15,4 @@ See also [this demo agent](https://github.com/jbemmel/srl-salt-minion-agent/tree
 5. Update ```lab/dev.clab.yml``` with any extra images and nodes like ```salt-master```
 6. Update the agent's YANG model to include any configuration parameters your agent needs, like ```master```
 7. Update the agent's application logic to do whatever it needs to do (like connect to the master)
+8. Run ```make redeploy-all``` to make it happen!
