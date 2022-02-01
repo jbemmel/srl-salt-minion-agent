@@ -1,1 +1,4 @@
 srlinux-ndk
+
+# JvB added for Salt minion
+salt
