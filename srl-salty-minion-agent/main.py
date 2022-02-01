@@ -1,21 +1,62 @@
 #!/usr/bin/env python
 # coding=utf-8
 
-import grpc
+import grpc, socket, json
 
 from datetime import datetime
 
-from ndk import sdk_service_pb2,sdk_service_pb2_grpc
+from ndk import sdk_service_pb2,sdk_service_pb2_grpc,config_service_pb2
 
 import logging
 from logging.handlers import RotatingFileHandler
 
-# Salt specific
-from salt.minion import Minion
-from salt.config import DEFAULT_MINION_OPTS
-
 agent_name = "srl-salty-minion-agent"
 
+##################################################################
+## Proc to process the config Notifications received by agent
+## Processing config from js_path = .<agent_name>
+##################################################################
+def Handle_Notification(obj):
+    if obj.HasField('config'):
+        logging.info(f"Handle_Notification :: {obj.config.key.js_path}")
+        if agent_name in obj.config.key.js_path:
+            logging.info(f"Got config for agent, now will handle it :: \n{obj.config}\
+                            Operation :: {obj.config.op}\nData :: {obj.config.data.json}")
+            if obj.config.op == 2:
+                logging.info("TODO - delete config scenario")
+                # response=stub.AgentUnRegister(request=sdk_service_pb2.AgentRegistrationRequest(), metadata=metadata)
+                # logging.info('Handle_Config: Unregister response:: {}'.format(response))
+            else:
+                json_acceptable_string = obj.config.data.json.replace("'", "\"")
+                data = json.loads(json_acceptable_string)
+                logging.info( data )
+                Connect_To_Master( '172.20.20.10' )
+
+def Connect_To_Master(address):
+
+  # Salt specific
+  from salt.minion import Minion
+  from salt.config import DEFAULT_MINION_OPTS
+
+  UUIDs = {
+   'srl1': '8f7d68e2-30c5-40c6-b84a-df7e978a03ee',
+   'srl2': '1d3c5473-1fbc-479e-b0c7-877705a0730f'
+  }
+  hostname = socket.gethostname()
+
+  opts = { **DEFAULT_MINION_OPTS,
+           'master': address,
+           'id': hostname,
+           'autosign_grains': ['id','uuid'],
+           '__role': 'minion',
+           'uuid': UUIDs[hostname] if hostname in UUIDs else '?'
+         }
+  try:
+    m = Minion( opts=opts )
+    m.sync_connect_master()
+    logging.info( f"Minion {hostname} connected to master" )
+  except Exception as ex:
+    logging.error(ex)
 
 if __name__ == "__main__":
 
@@ -37,14 +78,30 @@ if __name__ == "__main__":
     )
     logging.info(f"Agent succesfully registered! App ID: {response.app_id}")
 
-    opts = { **DEFAULT_MINION_OPTS,
-             'master': '172.20.20.10',
-             'id': '007','autosign_grains': ['id'],
-             '__role': 'minion'
-           }
+    # Subscribe to configuration events
+    request=sdk_service_pb2.NotificationRegisterRequest(op=sdk_service_pb2.NotificationRegisterRequest.Create)
+    create_subscription_response = sdk_mgr_client.NotificationRegister(request=request, metadata=metadata)
+    stream_id = create_subscription_response.stream_id
+    logging.info(f"Create subscription response received. stream_id : {stream_id}")
+
+    cfgsubreq = config_service_pb2.ConfigSubscriptionRequest()
+    request = sdk_service_pb2.NotificationRegisterRequest(
+     op=sdk_service_pb2.NotificationRegisterRequest.AddSubscription,
+     stream_id=stream_id, config=cfgsubreq)
+    subscription_response = sdk_mgr_client.NotificationRegister(request=request, metadata=metadata)
+
+    stream_request = sdk_service_pb2.NotificationStreamRequest(stream_id=stream_id)
+    sub_stub = sdk_service_pb2_grpc.SdkNotificationServiceStub(channel)
+    stream_response = sub_stub.NotificationStream(stream_request, metadata=metadata)
+
     try:
-      m = Minion( opts=opts )
-      m.sync_connect_master()
-      logging.info( "Minion connected to master" )
+      # Blocking call to wait for events
+      for r in stream_response:
+        logging.info(f"NOTIFICATION:: \n{r.notification}")
+        for obj in r.notification:
+            if obj.HasField('config') and obj.config.key.js_path == ".commit.end":
+                logging.info('TO DO -commit.end config')
+            else:
+                Handle_ConfigNotification(obj)
     except Exception as ex:
-      logging.error(ex)
+      logging.error( ex )

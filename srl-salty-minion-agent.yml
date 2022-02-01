@@ -4,6 +4,7 @@ srl-salty-minion-agent:
   # launch-command: /usr/local/bin/srl-salty-minion-agent
   path: /opt/srl-salty-minion-agent
   launch-command: /opt/srl-salty-minion-agent/run.sh
+  wait-for-config: Yes
   yang-modules:
     names: ["srl-salty-minion-agent"]
     source-directories:
