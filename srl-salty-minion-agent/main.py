@@ -17,20 +17,18 @@ agent_name = "srl-salty-minion-agent"
 ## Processing config from js_path = .<agent_name>
 ##################################################################
 def Handle_Notification(obj):
-    if obj.HasField('config'):
-        logging.info(f"Handle_Notification :: {obj.config.key.js_path}")
-        if agent_name in obj.config.key.js_path:
-            logging.info(f"Got config for agent, now will handle it :: \n{obj.config}\
-                            Operation :: {obj.config.op}\nData :: {obj.config.data.json}")
-            if obj.config.op == 2:
-                logging.info("TODO - delete config scenario")
-                # response=stub.AgentUnRegister(request=sdk_service_pb2.AgentRegistrationRequest(), metadata=metadata)
-                # logging.info('Handle_Config: Unregister response:: {}'.format(response))
-            else:
-                json_acceptable_string = obj.config.data.json.replace("'", "\"")
-                data = json.loads(json_acceptable_string)
-                logging.info( data )
-                Connect_To_Master( '172.20.20.10' )
+  if obj.HasField('config'):
+    logging.info(f"Got config for agent, now will handle it :: \n{obj.config}\
+                   Operation :: {obj.config.op}\nData :: {obj.config.data.json}")
+    if obj.config.op == 2:
+      logging.info("TODO - delete config scenario")
+      # response=stub.AgentUnRegister(request=sdk_service_pb2.AgentRegistrationRequest(), metadata=metadata)
+      # logging.info('Handle_Config: Unregister response:: {}'.format(response))
+    else:
+      json_acceptable_string = obj.config.data.json.replace("'", "\"")
+      data = json.loads(json_acceptable_string)
+      logging.info( data )
+      Connect_To_Master( data["master"]["value"] )
 
 def Connect_To_Master(address):
 
@@ -52,6 +50,7 @@ def Connect_To_Master(address):
            'uuid': UUIDs[hostname] if hostname in UUIDs else '?'
          }
   try:
+    logging.info( f"Minion {hostname} connecting to master at {address}" )
     m = Minion( opts=opts )
     m.sync_connect_master()
     logging.info( f"Minion {hostname} connected to master" )
@@ -102,6 +101,6 @@ if __name__ == "__main__":
             if obj.HasField('config') and obj.config.key.js_path == ".commit.end":
                 logging.info('TO DO -commit.end config')
             else:
-                Handle_ConfigNotification(obj)
+                Handle_Notification(obj)
     except Exception as ex:
       logging.error( ex )

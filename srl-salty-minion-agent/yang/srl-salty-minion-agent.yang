@@ -14,7 +14,7 @@ module srl-salty-minion-agent {
           description "IP address or hostname of salt master";
           type string;
           // mandatory true;
-          default "172.20.20.10";
+          default "salt-master";
         }
     }
 }
