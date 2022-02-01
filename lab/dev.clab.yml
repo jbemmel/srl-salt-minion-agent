@@ -1,0 +1,31 @@
+name: "srl-salty-minion-agent-dev"
+
+topology:
+  defaults:
+    kind: srl
+    image: ghcr.io/nokia/srlinux:21.11.1
+
+  nodes:
+    salt-master:
+      kind: linux
+      image: ghcr.io/cdalvaro/docker-salt-master:latest
+      mgmt_ipv4: 172.20.20.10
+      binds:
+      - "../logs/salt-master:/home/salt/data/logs/"
+      - "salt-master-config:/home/salt/data/config/"
+    srl1:
+      binds:
+        - "../srl-salty-minion-agent:/opt/srl-salty-minion-agent" # mount dir with agent code
+        - "../logs/srl1:/var/log/srlinux" # expose srlinux logs to a dev machine
+        - "../srl-salty-minion-agent.yml:/etc/opt/srlinux/appmgr/srl-salty-minion-agent.yml" # put agent config file to appmgr directory
+        - "../logs/srl1:/etc/salt/pki/minion"
+    srl2:
+      binds:
+        - "../srl-salty-minion-agent:/opt/srl-salty-minion-agent" # mount dir with agent code
+        - "../logs/srl2:/var/log/srlinux" # expose srlinux logs to a dev machine
+        - "../srl-salty-minion-agent.yml:/etc/opt/srlinux/appmgr/srl-salty-minion-agent.yml" # put agent config file to appmgr directory
+        - "../logs/srl2:/etc/salt/pki/minion"
+  links:
+    - endpoints:
+        - "srl1:e1-1"
+        - "srl2:e1-1"

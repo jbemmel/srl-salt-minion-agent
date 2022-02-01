@@ -1,0 +1,10 @@
+# srl-salty-minion-agent agent configuration file
+srl-salty-minion-agent:
+  # path: /usr/local/bin
+  # launch-command: /usr/local/bin/srl-salty-minion-agent
+  path: /opt/srl-salty-minion-agent
+  launch-command: /opt/srl-salty-minion-agent/run.sh
+  yang-modules:
+    names: ["srl-salty-minion-agent"]
+    source-directories:
+      - "/opt/srl-salty-minion-agent/yang"

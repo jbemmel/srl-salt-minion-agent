@@ -38,8 +38,13 @@ if __name__ == "__main__":
     logging.info(f"Agent succesfully registered! App ID: {response.app_id}")
 
     opts = { **DEFAULT_MINION_OPTS,
-             'master': '172.20.20.10', 'id': '007','autosign_grains': ['id'],
+             'master': '172.20.20.10',
+             'id': '007','autosign_grains': ['id'],
              '__role': 'minion'
            }
-    m = Minion( opts=opts )
-    m.sync_connect_master()
+    try:
+      m = Minion( opts=opts )
+      m.sync_connect_master()
+      logging.info( "Minion connected to master" )
+    except Exception as ex:
+      logging.error(ex)

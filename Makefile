@@ -76,7 +76,7 @@ redeploy-lab: destroy-lab deploy-lab create-app-symlink
 
 deploy-all: redeploy-all
 
-redeploy-all: redeploy-lab remote-venv # create-app-symlink restart-app
+redeploy-all: redeploy-lab remote-venv create-app-symlink # restart-app
 
 # lint an app and restart app_mgr without redeploying the lab
 lint-restart: lint restart-app
@@ -135,7 +135,6 @@ lint-yaml:
 	docker run --rm -v $$(pwd):/data cytopia/yamllint -d relaxed .
 
 lint: lint-yang lint-yaml
-<<<<<<< HEAD
 
 # Docker container for Minion
 NAME        := srl/salt-minion
@@ -156,5 +155,3 @@ docker-build:
 	                  --build-arg SR_LINUX_RELEASE="${SR_LINUX_RELEASE}" \
 	                  -f ./Dockerfile -t ${IMG} .
 	sudo docker tag ${IMG} ${LATEST}
-=======
->>>>>>> 63a86ed60ccbfc13c5b4ecb6919bd2776c9cad50
