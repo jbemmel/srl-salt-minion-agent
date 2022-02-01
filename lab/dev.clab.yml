@@ -14,12 +14,14 @@ topology:
       - "../logs/salt-master:/home/salt/data/logs/"
       - "salt-master-config:/home/salt/data/config/"
     srl1:
+      startup-config: allow-salt-tcp.cmd
       binds:
         - "../srl-salty-minion-agent:/opt/srl-salty-minion-agent" # mount dir with agent code
         - "../logs/srl1:/var/log/srlinux" # expose srlinux logs to a dev machine
         - "../srl-salty-minion-agent.yml:/etc/opt/srlinux/appmgr/srl-salty-minion-agent.yml" # put agent config file to appmgr directory
         - "../logs/srl1:/etc/salt/pki/minion"
     srl2:
+      startup-config: allow-salt-tcp.cmd
       binds:
         - "../srl-salty-minion-agent:/opt/srl-salty-minion-agent" # mount dir with agent code
         - "../logs/srl2:/var/log/srlinux" # expose srlinux logs to a dev machine

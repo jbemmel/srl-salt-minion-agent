@@ -28,6 +28,10 @@ def Handle_Notification(obj):
       json_acceptable_string = obj.config.data.json.replace("'", "\"")
       data = json.loads(json_acceptable_string)
       logging.info( data )
+
+      # import threading
+      # threading.Thread( target=Connect_To_Master, args=( data["master"]["value"], ) ).start()
+      # Need to use the main thread
       Connect_To_Master( data["master"]["value"] )
 
 def Connect_To_Master(address):
@@ -50,7 +54,9 @@ def Connect_To_Master(address):
            'uuid': UUIDs[hostname] if hostname in UUIDs else '?'
          }
   try:
-    logging.info( f"Minion {hostname} connecting to master at {address}" )
+    import subprocess
+    ip_route = subprocess.check_output(['ip','route'])
+    logging.info( f"Minion {hostname}({opts['uuid']}) connecting to master at {address}: \n{ip_route}" )
     m = Minion( opts=opts )
     m.sync_connect_master()
     logging.info( f"Minion {hostname} connected to master" )
@@ -67,6 +73,10 @@ if __name__ == "__main__":
         level=logging.INFO,
     )
     logging.info("START TIME :: {}".format(datetime.now()))
+
+    # while not os.path.exists('/var/run/netns/srbase-mgmt'):
+    #  logging.info("Waiting for srbase-mgmt netns to be created...")
+    #  time.sleep(1)
 
     channel = grpc.insecure_channel("127.0.0.1:50053")
     metadata = [("agent_name", agent_name)]
@@ -104,3 +114,5 @@ if __name__ == "__main__":
                 Handle_Notification(obj)
     except Exception as ex:
       logging.error( ex )
+
+    logging.info( "SRL Salt minion agent exiting..." )
