@@ -1,8 +1,8 @@
 # srl-salty-minion-agent agent configuration file
 srl-salty-minion-agent:
-  # path: /usr/local/bin
+  path: /usr/local/bin
   # launch-command: /usr/local/bin/srl-salty-minion-agent
-  path: /opt/srl-salty-minion-agent
+  # path: /opt/srl-salty-minion-agent
   launch-command: /opt/srl-salty-minion-agent/run.sh
   search-command: python3 /opt/srl-salty-minion-agent/main.py
   wait-for-config: Yes

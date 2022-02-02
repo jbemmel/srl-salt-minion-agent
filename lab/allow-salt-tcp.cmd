@@ -1,5 +1,5 @@
-/system acl cpm-filter ipv4-filter entry 345 {
-		description "Allow communication between Salt-master and Minion"
+/acl cpm-filter ipv4-filter entry 345 {
+		description "Allow communication from Minion to Salt-master"
         action {
             accept {
             }
@@ -15,7 +15,7 @@
         }
     }
 
-/system acl cpm-filter ipv4-filter entry 346 {
+/acl cpm-filter ipv4-filter entry 346 {
 		description "Allow communication between Salt-master and Minion"
         action {
             accept {

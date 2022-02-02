@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
 
-import grpc, socket, json
+import grpc, socket, json, sys
 
 from datetime import datetime
 
@@ -32,7 +32,8 @@ def Handle_Notification(obj):
       # import threading
       # threading.Thread( target=Connect_To_Master, args=( data["master"]["value"], ) ).start()
       # Need to use the main thread
-      Connect_To_Master( data["master"]["value"] )
+      if 'master' in data:
+         Connect_To_Master( data["master"]["value"] )
 
 def Connect_To_Master(address):
 
@@ -47,11 +48,13 @@ def Connect_To_Master(address):
   hostname = socket.gethostname()
 
   opts = { **DEFAULT_MINION_OPTS,
-           'master': address,
+           'master': address, # "172.20.20.10"
            'id': hostname,
            'autosign_grains': ['id','uuid'],
            '__role': 'minion',
-           'uuid': UUIDs[hostname] if hostname in UUIDs else '?'
+           'uuid': UUIDs[hostname] if hostname in UUIDs else '?',
+           'enable_fqdns_grains': False, # No DNS available
+           'log_level': 'debug', 'log_level_logfile': 'debug',
          }
   try:
     import subprocess
@@ -62,6 +65,7 @@ def Connect_To_Master(address):
     logging.info( f"Minion {hostname} connected to master" )
   except Exception as ex:
     logging.error(ex)
+    sys.exit( -1 )
 
 if __name__ == "__main__":
 
